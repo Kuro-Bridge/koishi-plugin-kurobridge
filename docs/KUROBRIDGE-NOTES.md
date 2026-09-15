@@ -37,3 +37,11 @@
 ## 里程碑实录
 
 （执行中回填）
+
+- **M2 前置（2026-09-15）**：真包接入一次成功——npmjs packument 可见（latest 0.1.0），
+  `bun install` 落在插件局部 `node_modules`（工作区未提升，无影响）；包导出为镜像面
+  超集，符号名两侧一致，`src/protocol/index.ts` 原位切换、仓内 import 零改动；镜像
+  三件套删除。golden 对表测试新建 `src/protocol/golden.test.ts`（27 例：常量逐字、
+  encodeFrame 逐字节、双向 schema 收窄/拒形、方向误用、wsOutboundFrame 全帧集），
+  测试放 `src/` 内使 biome+tsc 双覆盖（biome files.includes 只管 `**/src/**`）。
+  KD-01 镜像过渡形态就此终结。

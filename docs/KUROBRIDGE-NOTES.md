@@ -33,6 +33,20 @@
   真包（依赖 ^0.1.0，删镜像三件套，index.ts 改为包具名 re-export）。任务书更新数分钟
   后 npmjs packument 已确认可见（latest 0.1.0，此前 Not Found 为 CDN 负缓存），切换
   应直接成功；镜像三件套（KD-01）作为兜底保留至切换成功后即删。
+- **KD-10（协议包 0.1.0 exports 缺 require 条件 → 产物内联绕行）**：M6 构建核验发现
+  `@kuro-bridge/protocol@0.1.0` 的 `exports` 只有 `import` 条件（无 `require`/`default`），
+  ESM 消费（vitest）正常但 **CJS 产物 require 解析直接失败**（Bun/Node 实测 Cannot find
+  module）——Koishi loader 正是 require CJS，属发布阻断。绕行：tsdown `alwaysBundle:
+  ["@kuro-bridge/protocol"]` 打进产物（zod/ws 仍 external），构建产物 Bun 下全链路冒烟
+  （握手 + token/client 上报 + 版本解析 0.1.0）通过。**KuroAdapter 侧修复项**：
+  `bridge/protocol` 发布件补 `require` 条件（或发 CJS 产物 + exports 三态）后重发版，
+  本仓即可移除 alwaysBundle 例外。已在 readme 开发者节写明。
+- **KD-11（koishi 运行时载入 .yml → 装配测试 vi.mock 替身）**：`@koishi-ce/core` 运行时
+  import `.yml` 本地化文件，Bun 原生支持但 vitest 的 Node 运行时不认 → 装配测试
+  `vi.mock("koishi")` 注入无操作 Schema 桩（配置声明面）；类型检查仍走真实 koishi 类型
+  （`import type`）。同理，**本插件 CJS 产物只能在 Bun 宿主下加载**（Node 加载 koishi
+  即炸），冒烟一律用 `bun -e`。
+
 
 ## 里程碑实录
 
@@ -45,3 +59,21 @@
   encodeFrame 逐字节、双向 schema 收窄/拒形、方向误用、wsOutboundFrame 全帧集），
   测试放 `src/` 内使 biome+tsc 双覆盖（biome files.includes 只管 `**/src/**`）。
   KD-01 镜像过渡形态就此终结。
+- **M2 连接层（2026-09-15）**：`KurobridgeConnection` 状态机 + 假服务端
+  （`src/test-support.ts`，复刻 handleProtocols 拒连）12 例：子协议拒连、hello 逐字段、
+  token 有无、ping、pong 透传、未知帧三态容忍、退避重连重发 hello（UUID 每次新）、
+  hello 超时自断重试、三类永久停、用户 stop 静默。较 napuketto 参考实现新增
+  `retryJitter` 参数（任务书要求 ±20% 抖动，napuketto 无抖动；测试传 0 保确定性）。
+- **M3 翻译层（2026-09-15）**：纯函数 28 例。坑回填：tsc `noPropertyAccessFromIndexSignature`
+  与 biome `useLiteralKeys` 在 Record 字面量 key 访问上规则互斥 → 动态 key 的
+  `attrString(el, "id")` 助手同时绕开两侧。
+- **M4 适配层（2026-09-15）**：`KurobridgeAdapter` 13 例全链路。queryPending 存
+  resolve+reject（stop 时统一 reject，不留悬挂 promise）。
+- **M5 装配（2026-09-15）**：`Schema<Config>` 显式注解 + Config 全字段在
+  exactOptionalPropertyTypes 下过（M1 坑的预判成立）；`ctx.logger("kurobridge")`
+  可调用式（脚手架残迹佐证）；版本解析双路径（`__filename` 优先、import.meta 兜底），
+  CJS 产物实测取到 0.1.0。koishi vi.mock 替身见 KD-11。7 例。
+- **M6 发版准备（2026-09-15）**：KD-10 产物内联绕行 + Bun 全链路冒烟（假服务端握手，
+  token/client/version 实测正确）；readme 补齐（配置表/部署指引/多对端注意/开发者节）；
+  changesets 累计 5 条 minor（M2 前置 patch + M2~M5 minor），`changeset status` 待发版
+  一并 version。产物 41.2 kB（协议内联后）。

@@ -16,6 +16,9 @@ export default defineConfig({
     deps: {
         // 依赖全部 external（koishi 为 peer 单实例），不打进产物。
         bundle: false,
+        // 例外：@kuro-bridge/protocol 0.1.0 的 exports 只有 import 条件（缺
+        // require/default），CJS 产物 require 解析直接失败 → 强制打进产物绕行（KD-10）。
+        alwaysBundle: ["@kuro-bridge/protocol"],
         dts: {
             // koishi 生态 d.ts 用 CJS dts 语法（export = Element）或 namespace 成员
             // re-export，dts 打包无法解析 → 生成 d.ts 时保持外部引用

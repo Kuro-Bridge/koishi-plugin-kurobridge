@@ -17,6 +17,12 @@ import { DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_TEMPLATES } from "./translate.js";
 
 export const name = "kurobridge";
 
+/**
+ * 依赖注入声明：广播（游戏事件 → 平台）经 broadcastDatabase 走频道表，需要 database
+ * 服务；optional——无数据库的部署仍可跑平台 → 游戏方向（广播侧跳过并打日志）。
+ */
+export const inject = { database: "optional" };
+
 export interface Config {
     /** KuroBridge 服务端地址（ws:// 或 wss://）。 */
     url: string;
@@ -151,7 +157,7 @@ export function apply(ctx: Context, config: Config): void {
             onGameEvent: (_type, rendered, channel) => {
                 // 帧内 channel 为绑定表裸标识（如 QQ 群号）；koishi broadcast 按
                 // `platform:id` 限定路由（broadcastDatabase 语义），对每个在线 bot
-                // 平台各拼一个目标；无 bot 时跳过（无处可投）。
+                // 平台各拼一个目标。
                 const targets = [
                     ...new Set(
                         ctx.bots
@@ -160,9 +166,19 @@ export function apply(ctx: Context, config: Config): void {
                     ),
                 ];
                 if (targets.length === 0) {
+                    return; // 无 bot 在线（无处可投）
+                }
+                const database = ctx.database as unknown;
+                if (database === undefined || database === null) {
+                    logger.warn("无数据库服务，跳过游戏事件广播（如需双向互通请启用数据库插件）");
                     return;
                 }
-                void ctx.broadcast(targets, rendered);
+                logger.warn("M7-DEBUG onGameEvent", { channel, targets, rendered });
+                const p = ctx.broadcast(targets, rendered);
+                p.then(
+                    (ids) => logger.warn("M7-DEBUG broadcast resolved", { ids }),
+                    (err) => logger.warn("M7-DEBUG broadcast rejected", { err: String(err) }),
+                );
             },
             onStatus: (status) => {
                 logger.info("服务器状态", {

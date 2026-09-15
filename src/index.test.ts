@@ -59,8 +59,9 @@ function makeCtxStub(): {
     });
     const stub = {
         logger: () => makeLogger(),
-        // 在线 bot 平台面（广播路由按 platform:channel 拼目标）
+        // 在线 bot 平台面（广播路由按 platform:channel 拼目标）+ 数据库在场
         bots: [{ platform: "mock", selfId: "514" }],
+        database: {},
         broadcast: (channels: readonly string[], content: string) => {
             broadcasts.push({ channels: [...channels], content });
             return Promise.resolve([]);

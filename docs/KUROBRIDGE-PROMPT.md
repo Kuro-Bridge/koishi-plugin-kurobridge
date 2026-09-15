@@ -35,16 +35,10 @@ QQ 协议侧；连接状态机/测试模式可借鉴，但本仓用 Koishi 的�
 
 ## 实现顺序
 
-### M1 工程基座
-1. `koishi-dev` 根 `bun install`（脚手架 devDeps 从未安装过；装完确认根 node_modules
-   出现 tsdown/biome/@changesets，且 external/kurobridge 可解析 `koishi`）。
-2. 插件依赖：`ws`（runtime，deps.bundle=false 必须进 dependencies）、`zod ^4`
-   （镜像用）、devDeps `@types/ws`、`vitest`、`@types/bun` 按需；新增 `test` script
-   （vitest run）。
-3. 协议镜像落位 `src/protocol/`（从 KuroAdapter `bridge/protocol/src` 摘 WS 子集：
-   meta/frame/messages/ws + 统一出口），golden 常量对表
-   （PROTOCOL_VERSION=0.4.0，WS_SUBPROTOCOL=kurobridge-ws.v1）。
-4. `bun run check` 绿（脚手架空壳 + 镜像）。
+### M1 工程基座（✅ 已完成并提交——新会话从 M2 起步，勿重做）
+已完成内容：根 `bun install`（528 包）；插件 deps（ws、zod）+ devDeps（@types/ws、
+vitest）+ `test` script；协议镜像 `src/protocol/` 四件套（SSOT 基线 `17be8f6`，
+KD-01 单点出口）；biome 迁移 2.5.13；门禁绿。见 `git log` 首两条提交。
 
 ### M2 连接层 `src/connection.ts`
 状态机 `idle → connecting → establishing → established ↔ backoff → stopped`：
@@ -114,9 +108,15 @@ fake-player 或控制台触发 join/chat → 插件日志出现广播调用。�
 5. 禁 `any`；提交全带 changeset；KD 决策全部记 NOTES。
 6. 全程未 push 远端以外泄凭据（本地提交即可；push 结果如实记录）。
 
-## 踩坑传递（前仓实录）
+## 踩坑传递（前仓实录 + 本仓开工实测）
 
-- Bun 工作区：external 插件依赖由根提升，**必须先在 koishi-dev 根 bun install**。
+- Bun 工作区：external 插件依赖由根提升，**必须先在 koishi-dev 根 bun install**（M1 已装）。
+- **本仓无 pre-commit 钩子**：门禁不会拦提交，每次提交前手动 `bun run check`（M1 曾因此
+  把红门禁提交进去，靠 amend 补救）。
+- 脚手架坑（M1 实测，已修复但同类问题会再现）：biome.json schema 版本落后于装到的
+  biome CLI → `bunx biome migrate --write`；biome `organizeImports` 连 **export 列表的
+  排序**也管（`--write` 可修）；`Schema<Config>` 显式注解在 exactOptionalPropertyTypes
+  下对空 object 会炸 TS2375——用推断（不注解）或给 Config 全字段。
 - `koishi` import 实为 `@koishi-ce/koishi-shim@4.18.11`（peerDeps 已配好，直接
   `import {} from "koishi"`）。
 - death 帧字段名是 `player`/`message`，与 join/leave 的 `playerName` 不一致——照抄

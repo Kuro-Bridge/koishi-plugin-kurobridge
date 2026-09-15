@@ -14,11 +14,11 @@ QQ 协议侧；连接状态机/测试模式可借鉴，但本仓用 Koishi 的�
 ## 硬性约束
 
 1. **协议以 KuroAdapter `bridge/protocol`（0.4.0）为 SSOT**：常量、帧形状、close code
-   语义一律对表 SSOT，发现文档与代码漂移以代码为准。**`@kuro-bridge/protocol` 尚未发布
-   npm**（2026-09-15 实测 Not Found，RENAME 协作清单第 1 项未落地）→ v0.1 以
-   `src/protocol/` 镜像过渡：只镜像 WS 对端可见子集（IPC 帧不镜像），头注标注 SSOT 基线
-   （KuroAdapter master `17be8f6`），**全部 import 经单一模块 `src/protocol/index.ts`
-   转发**——真包发布后只改这一处（KD-01）。
+   语义一律对表 SSOT，发现文档与代码漂移以代码为准。**`@kuro-bridge/protocol` 已发布**
+   （用户 2026-09-15 晚发版，仓内 `bridge/protocol/package.json` 已 bump 0.1.0）→
+   依赖真包，**禁用镜像直探**：M1 曾落过 `src/protocol/` 过渡镜像（KD-01），新会话
+   第一动作 = 执行单点切换（见 M2 前置步骤），切换后镜像文件删除、golden 对表测试
+   保留（对象改为包导出）。
 2. **连接语义对齐 peer-guide**：子协议 `kurobridge-ws.v1` 必带；升级后 10s 内 hello；
    close 1002/1008 与 hello_ack ok:false = 永久停止；1001/1006/网络错误 = 指数退避重连
    （1s 起 ×2 封顶 30s，±20% 抖动）；应用层 ping（服务端 30s 空闲只认应用层入帧）；
@@ -39,6 +39,19 @@ QQ 协议侧；连接状态机/测试模式可借鉴，但本仓用 Koishi 的�
 已完成内容：根 `bun install`（528 包）；插件 deps（ws、zod）+ devDeps（@types/ws、
 vitest）+ `test` script；协议镜像 `src/protocol/` 四件套（SSOT 基线 `17be8f6`，
 KD-01 单点出口）；biome 迁移 2.5.13；门禁绿。见 `git log` 首两条提交。
+注：镜像在 M1 时是过渡形态，`@kuro-bridge/protocol` 随后已发布——按下方「M2 前置」
+执行单点切换。
+
+### M2 前置：协议单点切换（新会话的第一个动作）
+1. 插件加依赖 `"@kuro-bridge/protocol": "^0.1.0"`（KuroAdapter 仓
+   `bridge/protocol/package.json` 已 bump 0.1.0）→ koishi-dev 根 `bun install`。
+   **装不上 = 发版未生效/registry 可见性问题：保留 M1 镜像照常推进全部模块，
+   KD-09 记录，最终报告置顶提醒用户核实 publish 输出**；装得上 = 走 2。
+2. 切换：删除 `src/protocol/meta.ts`、`frame.ts`、`ws.ts`；`src/protocol/index.ts`
+   改为从 `@kuro-bridge/protocol` 具名 re-export（符号名两侧一致，仓内其余 import
+   零改动）；本仓代码仍一律经 `src/protocol/index.js` 导入（保持切换面收敛）。
+3. golden 对表测试保留（对象 = 包导出的 encodeFrame/schema 线格式），`bun run check`
+   绿后提交（changeset 说明依赖接入）。
 
 ### M2 连接层 `src/connection.ts`
 状态机 `idle → connecting → establishing → established ↔ backoff → stopped`：

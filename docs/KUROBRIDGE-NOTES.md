@@ -27,6 +27,12 @@
   默认 1500（napuketto 同值，配置化）。
 - **KD-08（adapter 平台无关）**：`src/adapter.ts` 不 import koishi（依赖注入回调），
   Koishi 装配只在 `src/index.ts` 薄壳——测试不需 Koishi 运行时。
+- **KD-09（协议真包接入，覆盖 KD-01 的过渡形态）**：用户 2026-09-15 晚发布
+  `@kuro-bridge/protocol`（KuroAdapter 仓 `bridge/protocol/package.json` 已 bump
+  0.1.0，改动在任务书更新时点尚未提交）。任务书已改：新会话第一动作 = 单点切换到
+  真包（依赖 ^0.1.0，删镜像三件套，index.ts 改为包具名 re-export）。任务书更新数分钟
+  后 npmjs packument 已确认可见（latest 0.1.0，此前 Not Found 为 CDN 负缓存），切换
+  应直接成功；镜像三件套（KD-01）作为兜底保留至切换成功后即删。
 
 ## 里程碑实录
 

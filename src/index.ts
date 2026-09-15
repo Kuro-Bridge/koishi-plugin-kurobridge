@@ -149,8 +149,20 @@ export function apply(ctx: Context, config: Config): void {
                 }
             },
             onGameEvent: (_type, rendered, channel) => {
-                // 帧内 channel 即服务端绑定表路由目标（多对端同频道重复投递是部署语义）
-                void ctx.broadcast([channel], rendered);
+                // 帧内 channel 为绑定表裸标识（如 QQ 群号）；koishi broadcast 按
+                // `platform:id` 限定路由（broadcastDatabase 语义），对每个在线 bot
+                // 平台各拼一个目标；无 bot 时跳过（无处可投）。
+                const targets = [
+                    ...new Set(
+                        ctx.bots
+                            .filter((bot) => bot.platform !== undefined && bot.platform !== "")
+                            .map((bot) => `${bot.platform}:${channel}`),
+                    ),
+                ];
+                if (targets.length === 0) {
+                    return;
+                }
+                void ctx.broadcast(targets, rendered);
             },
             onStatus: (status) => {
                 logger.info("服务器状态", {

@@ -59,6 +59,8 @@ function makeCtxStub(): {
     });
     const stub = {
         logger: () => makeLogger(),
+        // 在线 bot 平台面（广播路由按 platform:channel 拼目标）
+        bots: [{ platform: "mock", selfId: "514" }],
         broadcast: (channels: readonly string[], content: string) => {
             broadcasts.push({ channels: [...channels], content });
             return Promise.resolve([]);
@@ -236,7 +238,7 @@ describe("Koishi 装配", () => {
         emit("dispose", undefined);
     });
 
-    it("游戏事件 → ctx.broadcast 单频道（帧内 channel 即路由目标）", async () => {
+    it("游戏事件 → ctx.broadcast（裸频道号按在线 bot 平台拼 platform:channel）", async () => {
         const s = await server();
         const { emit, broadcasts } = await setupPlugin(["967493177"]);
         const conn = s.connections[s.connections.length - 1];
@@ -246,7 +248,7 @@ describe("Koishi 装配", () => {
         s.send(conn, { type: "join", body: { channel: "967493177", playerName: "Alex" } });
         await waitFor(() => (broadcasts.length > 0 ? broadcasts[0] : null));
         expect(broadcasts[0]).toEqual({
-            channels: ["967493177"],
+            channels: ["mock:967493177"],
             content: "Alex 加入了服务器",
         });
         emit("dispose", undefined);

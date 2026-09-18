@@ -31,6 +31,13 @@
 
 模板占位符：`{player}` / `{content}` / `{message}`；缺省变量代空串，未知占位符原样保留。
 
+## 安装
+
+- Koishi 市场搜索 `kurobridge` 一键安装；
+- 或手动安装：`npm i koishi-plugin-kurobridge`。
+
+协议包 `@kuro-bridge/protocol` 会作为本插件的运行时依赖自动安装，无需手动处理。
+
 ## 部署
 
 1. **MC 侧**：安装 KuroBridge 插件（Paper JAR），在 `plugins/kurobridge/config.json` 的
@@ -63,9 +70,9 @@ bun run build          # 构建（产物 lib/index.cjs，CJS）
 - 分层：`src/protocol/`（协议依赖统一出口）→ `src/connection.ts`（WS 客户端状态机）→
   `src/translate.ts`（纯函数翻译）→ `src/adapter.ts`（平台无关核心）→ `src/index.ts`
   （Koishi 装配）。平台渲染（富文本降级/色码剥离/长度收敛）只在本仓。
-- **已知构建注意**：`@kuro-bridge/protocol` 0.1.0 的 `exports` 缺 `require`/`default`
-  条件，CJS 产物无法 require 解析 → tsdown 以 `alwaysBundle` 将其打进产物绕行
-  （`tsdown.config.ts`）。上游修复 exports 后可移除该例外。
+- **协议依赖**：插件以 `@kuro-bridge/protocol@^0.4.0` 为真实运行时依赖——0.4.0 起
+  `exports` 为双格式（含 `require`），CJS 产物可直接 require 解析（ADR-001 阶段 2 落地，
+  KD-10 结案）；tsdown 不再将协议包内联进产物，原 `alwaysBundle` 绕行例外已移除。
 - KuroAdapter 侧协议改动须保持与已发布 `@kuro-bridge/protocol` 一致；本仓 golden 对表
   测试（`src/protocol/golden.test.ts`）锁定发布件线格式，上游漂移会在此立即红。
 

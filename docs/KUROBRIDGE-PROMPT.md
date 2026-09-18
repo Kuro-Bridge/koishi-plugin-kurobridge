@@ -1,5 +1,10 @@
 # KUROBRIDGE-PROMPT —— koishi-plugin-kurobridge v0.1 任务书
 
+> **【归档说明（2026-09-18）】** 本册为 v0.1 任务书历史档案：M1-M7 已全部交付完结，
+> 2026-09-18 归档。项目现状以 README 与 `docs/KUROBRIDGE-NOTES.md` 为准，勿按本册
+> 「新会话第一个动作」「新会话从 M2 起步」等指令行事；文中沙盒地址/token 等当时态
+> 信息均已失效。
+
 > 执行者先读本仓 `AGENTS.md` → 本册 → KuroAdapter `docs/protocol/peer-guide.md`（对端契约）。
 > 执行模式：无人值守。不提问；决策记 `docs/KUROBRIDGE-NOTES.md`（编号 KD-xx）；单点卡住
 > 30 分钟即降级记录并绕行。每完成一个模块跑 `bun run check`。主分支直提，提交必带 changeset。
@@ -19,6 +24,8 @@ QQ 协议侧；连接状态机/测试模式可借鉴，但本仓用 Koishi 的�
    依赖真包，**禁用镜像直探**：M1 曾落过 `src/protocol/` 过渡镜像（KD-01），新会话
    第一动作 = 执行单点切换（见 M2 前置步骤），切换后镜像文件删除、golden 对表测试
    保留（对象改为包导出）。
+   > 【已完结（2026-09-18 归档注）】镜像过渡与单点切换均已按 KD-09 完结，本条为已
+   > 履行完毕的历史约束，现状见 NOTES「M2 前置」实录。
 2. **连接语义对齐 peer-guide**：子协议 `kurobridge-ws.v1` 必带；升级后 10s 内 hello；
    close 1002/1008 与 hello_ack ok:false = 永久停止；1001/1006/网络错误 = 指数退避重连
    （1s 起 ×2 封顶 30s，±20% 抖动）；应用层 ping（服务端 30s 空闲只认应用层入帧）；
@@ -36,6 +43,10 @@ QQ 协议侧；连接状态机/测试模式可借鉴，但本仓用 Koishi 的�
 ## 实现顺序
 
 ### M1 工程基座（✅ 已完成并提交——新会话从 M2 起步，勿重做）
+
+> 【已完结（2026-09-18 归档注）】M1-M7 已全部交付完结，不存在「新会话」续作场景；
+> 本册各处「新会话」指引均已失效，仅作历史记录。
+
 已完成内容：根 `bun install`（528 包）；插件 deps（ws、zod）+ devDeps（@types/ws、
 vitest）+ `test` script；协议镜像 `src/protocol/` 四件套（SSOT 基线 `17be8f6`，
 KD-01 单点出口）；biome 迁移 2.5.13；门禁绿。见 `git log` 首两条提交。
@@ -43,6 +54,10 @@ KD-01 单点出口）；biome 迁移 2.5.13；门禁绿。见 `git log` 首两�
 执行单点切换。
 
 ### M2 前置：协议单点切换（新会话的第一个动作）
+
+> 【已完结（2026-09-18 归档注）】单点切换已于 2026-09-15 一次成功执行完毕（KD-09、
+> NOTES「M2 前置」实录），镜像三件套已删除；本节仅为历史步骤记录。
+
 1. 插件加依赖 `"@kuro-bridge/protocol": "^0.1.0"`（KuroAdapter 仓
    `bridge/protocol/package.json` 已 bump 0.1.0）→ koishi-dev 根 `bun install`。
    **装不上 = 发版未生效/registry 可见性问题：保留 M1 镜像照常推进全部模块，
@@ -104,6 +119,11 @@ readme 补齐（简介/配置表/部署指引指向 peer-guide/与 MC 侧的对�
 （minor：初始功能集）；`bun run build` 产物核验（lib/index.cjs + .d.ts，CJS）。
 
 ### M7 真机联调（KuroAdapter 沙盒）
+
+> 【已完结（2026-09-18 归档注）】真机联调已完成，实录见 NOTES「M7 真机联调补记」。
+> 【已失效（2026-09-18 归档注）】下文沙盒地址 ws://127.0.0.1:25580 与 token
+> `kurobridge-sandbox-token` 均为当时态、已失效，勿再使用。
+
 MC 侧沙盒服在跑（ws://127.0.0.1:25580，token `kurobridge-sandbox-token`，napuketto
 对端已在线——多对端并存是设计语义）。koishi-dev 根安装后 koishi.yml 挂
 `kurobridge` 插件条目 → 后台 `bun start` → 验四点：①握手成功日志 + bindings 快照
@@ -117,6 +137,8 @@ fake-player 或控制台触发 join/chat → 插件日志出现广播调用。�
 1. `bun run check` / `bun run test`（三层测试全绿）/ `bun run build` 全绿。
 2. 连接层覆盖 peer-guide 关闭策略全分支（1002/1008 永久停、1001/1006 重连、用户 stop）。
 3. golden 帧对表：镜像帧线格式与 KuroAdapter SSOT 0.4.0 逐字节一致（对表基线 `17be8f6`）。
+   > 【已完结（2026-09-18 归档注）】对表对象现为 `@kuro-bridge/protocol` 包导出线格式
+   > （镜像已删），本条验收已通过。
 4. M7 四点实测过。
 5. 禁 `any`；提交全带 changeset；KD 决策全部记 NOTES。
 6. 全程未 push 远端以外泄凭据（本地提交即可；push 结果如实记录）。

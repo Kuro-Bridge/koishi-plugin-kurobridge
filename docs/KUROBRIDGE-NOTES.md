@@ -77,3 +77,23 @@
   token/client/version 实测正确）；readme 补齐（配置表/部署指引/多对端注意/开发者节）；
   changesets 累计 5 条 minor（M2 前置 patch + M2~M5 minor），`changeset status` 待发版
   一并 version。产物 41.2 kB（协议内联后）。
+
+## 发版前求真补记（2026-09-18）
+
+- **M7 真机联调补记（2026-09-18 回填）**：任务书 M7 节为待办口径的当时态记录，实际
+  真机联调已完成并交付，此处补记实录——真机发现并修复一项路由问题：绑定表频道为裸
+  群号，koishi broadcast 要求 `platform:id` 限定形式，直接广播报 channel not found
+  且无出站；85fd310 改为按在线 bot 平台拼 `platform:channel` 后广播（无在线 bot 时
+  跳过），随附 changeset `brave-frogs-jump`。另 fd659b2 增加数据库依赖注入声明
+  （inject database）并在无库时跳过广播——该提交当时漏写 changeset，由本波补记
+  patch 一并覆盖（任务书「提交必带 changeset」此处曾有违例，如实记录）。
+- **KD-12（GitHub 仓转移求真）**：仓库已由 `Oppenheymu/koishi-plugin-kurobridge`
+  转移至 org `Kuro-Bridge/koishi-plugin-kurobridge`（301 重定向实证）。`package.json`
+  的 repository/homepage 已指向新 org，名实相符、无需改动；本地 git remote 当时仍指
+  旧址（靠 301 重定向工作），2026-09-18 已 `git remote set-url` 对齐新址，并以
+  `git ls-remote origin HEAD` 直连验证通过（不再依赖重定向）。koishi.description 的
+  占位文案与空 service 声明由本波修复（manifest 改动由并行波次落地，本条只记事实
+  裁决）。KD-10 所述 alwaysBundle 例外的移除与协议依赖升级由并行波次同步落实（升级
+  实录数据待 KD-13 回填，本条不含）。另纠正 M6 实录中 changesets 计数：发版前实际
+  累计 6 条（4 minor + 2 patch，patch 为 fluffy-moons-prove 与 brave-frogs-jump），
+  原文「累计 5 条」已过期。

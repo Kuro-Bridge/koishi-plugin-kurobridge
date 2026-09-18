@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "name": "koishi-plugin-kurobridge",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "kurobridge-ws 官方参考对端：MC 服务器 ↔ 聊天平台群服互通（Koishi v4）",
   "contributors": [
     "Oppenheymu <oppenheymu@gmail.com>"

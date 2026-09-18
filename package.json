@@ -49,7 +49,7 @@
     "release": "changeset version && tsdown && npm publish --access public"
   },
   "dependencies": {
-    "@kuro-bridge/protocol": "^0.1.0",
+    "@kuro-bridge/protocol": "^0.4.0",
     "ws": "^8.18.0",
     "zod": "^4.0.0"
   },

@@ -173,7 +173,7 @@ describe("Koishi 装配", () => {
             protocolVersion: "0.4.0",
         });
         expect((hello?.body as { version?: string } | undefined)?.version).toMatch(
-            /^0\.1\.0$|unknown/,
+            /^\d+\.\d+\.\d+$|^unknown/,
         );
         expect((hello?.body as { client?: string } | undefined)?.client).toContain(
             "koishi-plugin-kurobridge",

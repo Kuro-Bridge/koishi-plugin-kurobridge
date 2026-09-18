@@ -67,9 +67,11 @@
   },
   "koishi": {
     "description": {
-      "en": "一个 Koishi 插件",
-      "zh": "一个 Koishi 插件"
+      "en": "Official kurobridge-ws reference peer: bridge a Minecraft server with chat platforms (Koishi v4)",
+      "zh": "kurobridge-ws 官方参考对端：MC 服务器 ↔ 聊天平台群服互通（Koishi v4）"
     },
-    "service": {}
+    "service": {
+      "database": "optional"
+    }
   }
 }

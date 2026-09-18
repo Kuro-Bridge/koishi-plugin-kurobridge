@@ -97,3 +97,18 @@
   实录数据待 KD-13 回填，本条不含）。另纠正 M6 实录中 changesets 计数：发版前实际
   累计 6 条（4 minor + 2 patch，patch 为 fluffy-moons-prove 与 brave-frogs-jump），
   原文「累计 5 条」已过期。
+
+## 协议升级实录补记（2026-09-18）
+
+- **KD-13（协议依赖 ^0.1.0→^0.4.0 + 外置 require 实录，KD-10 结案）**：协议依赖
+  `^0.1.0` → `^0.4.0`（npm 包版本轴对齐协议版本轴，0.x 区间接不到 0.4.0）；移除
+  tsdown `alwaysBundle` 内联绕行，产物改运行时 require 协议包（0.4.0 exports 已含
+  require 条件）——产物 41.2 kB（内联）→ 29.4 kB（外置 require），约 -29%；协议
+  线格式零变化。golden 契约测试升级为消费发布件包内金样本 16 份（fixtures/v0.4，
+  validateFixture 契约校验 + SHA256SUMS 清单双向完整性 + 版本目录对齐），测试
+  27→90 全绿。Bun 产物三层冒烟 SMOKE-OK：require
+  `@kuro-bridge/protocol@0.4.0` / 具名导出加载（inject.database=optional）/
+  假服务端握手（kurobridge-ws.v1，protocolVersion 0.4.0）。对应提交 fffdd52（升级
+  主体 + 金样本契约测试）、8aa636a（日志清理 + 无库广播补记）、d1e90e2（元数据
+  求真）。本波 changeset version 合并 9 条 changesets 发版 0.2.0；版本跃迁致
+  index.test 自报版本断言 `^0.1.0$` 过期，放宽为 semver|unknown 通式（e3d808d）。

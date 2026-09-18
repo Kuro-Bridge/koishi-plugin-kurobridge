@@ -173,12 +173,9 @@ export function apply(ctx: Context, config: Config): void {
                     logger.warn("无数据库服务，跳过游戏事件广播（如需双向互通请启用数据库插件）");
                     return;
                 }
-                logger.warn("M7-DEBUG onGameEvent", { channel, targets, rendered });
-                const p = ctx.broadcast(targets, rendered);
-                p.then(
-                    (ids) => logger.warn("M7-DEBUG broadcast resolved", { ids }),
-                    (err) => logger.warn("M7-DEBUG broadcast rejected", { err: String(err) }),
-                );
+                void ctx.broadcast(targets, rendered).catch((err) => {
+                    logger.warn("游戏事件广播失败", { err: String(err) });
+                });
             },
             onStatus: (status) => {
                 logger.info("服务器状态", {
